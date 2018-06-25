@@ -12,6 +12,10 @@ all hosts must have qemu-kvm-modified and 50_emulator installed
 Example setting qemu-kvm-modified in oVirt Node
 -----------------------------------------------------
 
+###################################
+Legacy ovirt-node 3.x instructions
+###################################
+
 1) Remount FileSystem for reading and writing and enable ssh
 
 In the Text User Interface (TUI) press F2 to go to console
@@ -21,19 +25,22 @@ In the Text User Interface (TUI) press F2 to go to console
 2) Copy the vdsm hook 50_emulator to /usr/libexec/vdsm/hooks/before_vm_start
 
 # cp 50_emulator /usr/libexec/vdsm/hooks/before_vm_start
-chcon --reference /usr/libexec/vdsm/hooks/before_vm_start/50_vhostmd /usr/libexec/vdsm/hooks/before_vm_start/50_emulator
-chmod +x /usr/libexec/vdsm/hooks/before_vm_start/50_emulator
-persist /usr/libexec/vdsm/hooks/before_vm_start/50_emulator
+# chcon --reference /usr/libexec/vdsm/hooks/before_vm_start/50_vhostmd /usr/libexec/vdsm/hooks/before_vm_start/50_emulator
+# chmod +x /usr/libexec/vdsm/hooks/before_vm_start/50_emulator
+# persist /usr/libexec/vdsm/hooks/before_vm_start/50_emulator
 
 3) Copy the qemu-kvm-modified wrapper to /usr/libexec/vdsm/hooks/qemu-kvm-wrapper
 
-mkdir /usr/libexec/vdsm/hooks/qemu-kvm-wrapper
-cp qemu-kvm-modified /usr/libexec/vdsm/hooks/qemu-kvm-wrapper
-chcon --reference /usr/libexec/qemu-kvm  /usr/libexec/vdsm/hooks/qemu-kvm-wrapper/qemu-kvm-modified
-chmod +x /usr/libexec/vdsm/hooks/qemu-kvm-wrapper/qemu-kvm-modified
-persist /usr/libexec/vdsm/hooks/qemu-kvm-wrapper/qemu-kvm-modified
+# mkdir /usr/libexec/vdsm/hooks/qemu-kvm-wrapper
+# cp qemu-kvm-modified /usr/libexec/vdsm/hooks/qemu-kvm-wrapper
+# chcon --reference /usr/libexec/qemu-kvm  /usr/libexec/vdsm/hooks/qemu-kvm-wrapper/qemu-kvm-modified
+# chmod +x /usr/libexec/vdsm/hooks/qemu-kvm-wrapper/qemu-kvm-modified
+# persist /usr/libexec/vdsm/hooks/qemu-kvm-wrapper/qemu-kvm-modified
 
-#4 Stop and Start the virtual machine via oVirt Engine
+4) Revert RW filesystem mode
+# mount -o remount,ro /
+
+5) Stop and Start the virtual machine via oVirt Engine
 
 Will trigger...
 ----------------------------------------------
@@ -55,5 +62,30 @@ Disabling the qemu-kvm-modified
 -------------------------------------------------
 # unpersist /usr/libexec/vdsm/hooks/before_vm_start/50_emulator
 # unpersist /usr/libexec/vdsm/qemu-kvm-wrapper/qemu-kvm-modified
+# rm -f /usr/libexec/vdsm/hooks/before_vm_start/50_emulator
+# rm -fr /usr/libexec/vdsm/qemu-kvm-wrapper/
+
+
+###########################
+4.x ovirt-node instructions
+###########################
+
+1) Copy the vdsm hook 50_emulator to /usr/libexec/vdsm/hooks/before_vm_start
+
+# cp 50_emulator /usr/libexec/vdsm/hooks/before_vm_start
+# chcon --reference /usr/libexec/vdsm/hooks/before_vm_start/50_vhostmd /usr/libexec/vdsm/hooks/before_vm_start/50_emulator
+# chmod +x /usr/libexec/vdsm/hooks/before_vm_start/50_emulator
+
+2) Copy the qemu-kvm-modified wrapper to /usr/libexec/vdsm/hooks/qemu-kvm-wrapper
+
+# mkdir /usr/libexec/vdsm/hooks/qemu-kvm-wrapper
+# cp qemu-kvm-modified /usr/libexec/vdsm/hooks/qemu-kvm-wrapper
+# chcon --reference /usr/libexec/qemu-kvm  /usr/libexec/vdsm/hooks/qemu-kvm-wrapper/qemu-kvm-modified
+# chmod +x /usr/libexec/vdsm/hooks/qemu-kvm-wrapper/qemu-kvm-modified
+
+3) Stop and Start the virtual machine via oVirt Engine
+
+Disabling the qemu-kvm-modified
+-------------------------------------------------
 # rm -f /usr/libexec/vdsm/hooks/before_vm_start/50_emulator
 # rm -fr /usr/libexec/vdsm/qemu-kvm-wrapper/
